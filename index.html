@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FLEXMAP - Universidad Nacional de Trujillo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh;padding:20px;
+    }
+    .container{max-width:1400px;margin:0 auto}
+    .header{
+      background:white;border-radius:20px;padding:25px 40px;margin-bottom:30px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;justify-content:space-between;
+      align-items:center;flex-wrap:wrap;gap:20px;
+    }
+    .logo-section{display:flex;align-items:center;gap:15px}
+    .logo{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;color:white;font-size:30px;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
+    .site-title h1{font-size:28px;color:#333}
+    .site-title p{font-size:14px;color:#666}
+    .search-section{flex:1;max-width:500px;position:relative}
+    .search-input{width:100%;padding:15px 50px;border:2px solid #e0e0e0;border-radius:50px;font-size:15px}
+    .search-input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 4px rgba(102,126,234,0.1)}
+    .search-icon,.mic-icon{position:absolute;top:50%;transform:translateY(-50%);color:#667eea;cursor:pointer}
+    .search-icon{left:20px}.mic-icon{right:20px}
+    .user-section{display:flex;gap:15px;align-items:center}
+    .btn-icon{width:45px;height:45px;border-radius:50%;border:2px solid #e0e0e0;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+    .btn-icon:hover{background:#f5f5f5;border-color:#667eea}
+    .notification-badge{position:absolute;top:-5px;right:-5px;background:#f5576c;color:white;border-radius:50%;width:20px;height:20px;font-size:11px;display:flex;align-items:center;justify-content:center}
+    .user-info{display:flex;align-items:center;gap:10px;padding:8px 15px;background:#f5f5f5;border-radius:50px;cursor:pointer}
+    .user-avatar{width:35px;height:35px;border-radius:50%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;display:flex;align-items:center;justify-content:center;font-weight:bold}
+    .main-content{display:grid;grid-template-columns:350px 1fr 350px;gap:30px}
+    .card{background:white;border-radius:20px;padding:25px;box-shadow:0 10px 40px rgba(0,0,0,0.1);margin-bottom:20px}
+    .card-title{font-size:18px;font-weight:700;color:#333;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+    .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+    .quick-btn{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px;background:#f8f9fa;border:none;border-radius:15px;cursor:pointer;transition:all .3s}
+    .quick-btn:hover{transform:translateY(-5px);box-shadow:0 5px 20px rgba(0,0,0,.1)}
+    .quick-icon{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:24px}
+    .map-section{background:white;border-radius:20px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,0.1)}
+    .map-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:15px}
+    /* MAP CANVAS + SVG */
+    .map-canvas{position:relative;width:100%;height:600px;background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);border-radius:15px;overflow:hidden;margin-bottom:20px}
+    .map-svg{position:absolute;inset:0}
+    .building{
+      position:absolute;background:white;border-radius:12px;padding:12px 14px;box-shadow:0 5px 20px rgba(0,0,0,0.15);
+      cursor:pointer;transition:all .18s;min-width:84px;text-align:center;transform:translate(-50%,-50%);
+    }
+    .building:hover{transform:translate(-50%,-50%) scale(1.08);z-index:50}
+    .building.selected{border:3px solid #667eea}
+    .building-icon{font-size:28px;margin-bottom:6px}
+    .building-name{font-size:12px;font-weight:700;color:#333}
+    .legend{background:#f8f9fa;padding:14px;border-radius:12px}
+    .class-item{display:flex;align-items:center;gap:15px;padding:15px;background:#f8f9fa;border-radius:12px;margin-bottom:12px;cursor:pointer;border-left:4px solid #667eea}
+    .class-time{padding:10px 15px;background:#667eea;color:white;border-radius:10px;font-weight:700}
+    .info-photo{width:100%;height:120px;border-radius:8px;background:#e9ecef;display:flex;align-items:center;justify-content:center;color:#777;margin-bottom:12px}
+    .info-row{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    .small-pill{padding:6px 8px;border-radius:8px;background:#f1f3ff;font-weight:600;font-size:13px;color:#333}
+    .btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+    .btn-navigate{width:100%;padding:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:10px;font-size:15px;cursor:pointer;margin-top:8px}
+    .route-controls{display:flex;gap:10px;margin-top:10px}
+    /* SVG route style */
+    .route-line{fill:none;stroke:#4facfe;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+    .route-line.animated{stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 1.2s linear forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    @media (max-width:992px){.main-content{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(4,1fr)}}
+    @media (max-width:768px){body{padding:10px}.header{padding:20px}.search-section{order:3;width:100%;max-width:none}.map-canvas{height:420px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo-section">
+        <div class="logo"><i class="fas fa-map-marked-alt"></i></div>
+        <div class="site-title">
+          <h1>FLEXMAP</h1>
+          <p>Universidad Nacional de Trujillo</p>
+        </div>
+      </div>
+
+      <div class="search-section">
+        <i class="fas fa-search search-icon"></i>
+        <input id="searchInput" class="search-input" placeholder="Buscar aulas, edificios..." />
+        <i class="fas fa-microphone mic-icon" onclick="voiceSearch()"></i>
+      </div>
+
+      <div class="user-section">
+        <button class="btn-icon" onclick="showNotifications()">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-info">
+          <div class="user-avatar">E</div>
+          <span>Estudiante</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <!-- LEFT SIDEBAR -->
+      <aside class="sidebar">
+        <div class="card">
+          <h2 class="card-title"><i class="fas fa-bolt"></i> Acceso Rápido</h2>
+          <div class="quick-grid">
+            <button class="quick-btn" onclick="openModal('schedule')">
+              <div class="quick-icon" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"><i class="fas fa-calendar"></i></div>
+              <span>Mis Clases</span>
+            </button>
+            <button class="quick-btn" onclick="navigateTo('biblioteca')">
+              <div class="quick-icon" style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)"><i class="fas fa-book"></i></div>
+              <span>Biblioteca</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('navigate')">
+              <div class="quick-icon" style="background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)"><i class="fas fa-route"></i></div>
+              <span>Navegar</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('addclass')">
+              <div class="quick-icon" style="background:linear-gradient(135deg,#fa709a 0%,#fee140 100%)"><i class="fas fa-plus"></i></div>
+              <span>Agregar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><i class="fas fa-clock"></i> Próximas Clases</h2>
+          <div class="class-item" onclick="navigateTo('A-201')">
+            <div class="class-time">10:00</div>
+            <div style="flex:1">
+              <div style="font-weight:600">Cálculo II</div>
+              <div style="font-size:13px;color:#666"><i class="fas fa-map-marker-alt"></i> Aula A-201</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </div>
+
+          <div class="class-item" onclick="navigateTo('C-105')">
+            <div class="class-time">12:00</div>
+            <div style="flex:1">
+              <div style="font-weight:600">Programación</div>
+              <div style="font-size:13px;color:#666"><i class="fas fa-map-marker-alt"></i> Lab C-105</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAP -->
+      <main class="map-section">
+        <div class="map-controls">
+          <h2 style="font-size:24px;font-weight:700">Mapa del Campus</h2>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn-navigate" onclick="clearRoute()">Ocultar Ruta</button>
+            <button class="btn-navigate" onclick="resetSelection()">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="map-canvas" id="mapCanvas">
+          <!-- SVG overlay for routes -->
+          <svg class="map-svg" id="mapSvg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+            <!-- routes will be inserted here -->
+            <g id="routesLayer"></g>
+            <!-- OPTIONAL: grid / background - omitted to keep clean -->
+          </svg>
+
+          <!-- buildings (absolute positioned using %
+               data-x and data-y are percentages of the canvas -->
+          <div class="building" data-id="edificio-a" data-x="15" data-y="25"
+               onclick="selectBuilding(event,'Edificio A','edificio-a')">
+            <i class="fas fa-building building-icon" style="color:#667eea"></i>
+            <div class="building-name">Edificio A</div>
+          </div>
+
+          <div class="building" data-id="biblioteca" data-x="50" data-y="15"
+               onclick="selectBuilding(event,'Biblioteca Central','biblioteca')">
+            <i class="fas fa-book-open building-icon" style="color:#f093fb"></i>
+            <div class="building-name">Biblioteca</div>
+          </div>
+
+          <div class="building" data-id="cafeteria" data-x="30" data-y="55"
+               onclick="selectBuilding(event,'Cafetería Principal','cafeteria')">
+            <i class="fas fa-utensils building-icon" style="color:#fa709a"></i>
+            <div class="building-name">Cafetería</div>
+          </div>
+
+          <div class="building" data-id="lab-comp" data-x="65" data-y="50"
+               onclick="selectBuilding(event,'Lab. Computación','lab-comp')">
+            <i class="fas fa-laptop-code building-icon" style="color:#4facfe"></i>
+            <div class="building-name">Lab. Comp.</div>
+          </div>
+
+          <div class="building" data-id="rectorado" data-x="12" data-y="65"
+               onclick="selectBuilding(event,'Rectorado','rectorado')">
+            <i class="fas fa-graduation-cap building-icon" style="color:#fee140"></i>
+            <div class="building-name">Rectorado</div>
+          </div>
+
+          <div class="building" data-id="auditorio" data-x="75" data-y="25"
+               onclick="selectBuilding(event,'Auditorio','auditorio')">
+            <i class="fas fa-theater-masks building-icon" style="color:#a18cd1"></i>
+            <div class="building-name">Auditorio</div>
+          </div>
+        </div>
+
+        <div style="background:#f8f9fa;padding:20px;border-radius:12px">
+          <div style="display:flex;gap:20px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:20px;height:20px;background:#667eea;border-radius:5px"></div><span style="font-size:13px">Aulas</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:20px;height:20px;background:#f093fb;border-radius:5px"></div><span style="font-size:13px">Servicios</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:20px;height:20px;background:#4facfe;border-radius:5px"></div><span style="font-size:13px">Laboratorios</span></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT SIDEBAR (INFORMACIÓN MEJORADA) -->
+      <aside class="sidebar">
+        <div class="card">
+          <h2 class="card-title"><i class="fas fa-info-circle"></i> Información</h2>
+          <div id="buildingInfo" style="background:#f8f9fa;padding:20px;border-radius:12px;color:#333">
+            <div id="infoContent">
+              <p style="color:#999;text-align:center">Selecciona un edificio del mapa</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><i class="fas fa-concierge-bell"></i> Servicios</h2>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f8f9fa;border-radius:10px;cursor:pointer">
+              <div style="width:40px;height:40px;background:#667eea;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white"><i class="fas fa-wifi"></i></div>
+              <span>WiFi Gratis</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f8f9fa;border-radius:10px;cursor:pointer">
+              <div style="width:40px;height:40px;background:#f093fb;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white"><i class="fas fa-print"></i></div>
+              <span>Impresión</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f8f9fa;border-radius:10px;cursor:pointer">
+              <div style="width:40px;height:40px;background:#4facfe;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white"><i class="fas fa-parking"></i></div>
+              <span>Estacionamiento</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Clase -->
+  <div class="modal" id="modalAddClass" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center;padding:20px">
+    <div class="modal-content" style="background:white;border-radius:20px;padding:30px;max-width:500px;width:100%;position:relative">
+      <button class="modal-close" onclick="closeModal('modalAddClass')" style="position:absolute;top:20px;right:20px;width:35px;height:35px;border-radius:50%;border:none;background:#f5f5f5;cursor:pointer"><i class="fas fa-times"></i></button>
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:20px">Agregar Nueva Clase</h2>
+      <form onsubmit="addClass(event)">
+        <div class="form-group">
+          <label class="form-label">Nombre del Curso</label>
+          <input id="courseName" class="form-input" type="text" placeholder="Ej: Cálculo II" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora</label>
+          <input id="courseTime" class="form-input" type="time" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ubicación</label>
+          <select id="courseLocation" class="form-select" required>
+            <option value="">Selecciona una ubicación</option>
+            <option value="A-201">Edificio A - Aula 201</option>
+            <option value="A-305">Edificio A - Aula 305</option>
+            <option value="C-105">Lab Computación - 105</option>
+            <option value="B-202">Biblioteca - Sala 202</option>
+          </select>
+        </div>
+        <button class="btn-submit" type="submit"><i class="fas fa-plus"></i> Agregar Clase</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Navegación -->
+  <div class="modal" id="modalNavigate" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center;padding:20px">
+    <div class="modal-content" style="background:white;border-radius:20px;padding:30px;max-width:500px;width:100%;position:relative">
+      <button class="modal-close" onclick="closeModal('modalNavigate')" style="position:absolute;top:20px;right:20px;width:35px;height:35px;border-radius:50%;border:none;background:#f5f5f5;cursor:pointer"><i class="fas fa-times"></i></button>
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:20px">Navegar a...</h2>
+      <form onsubmit="startNavigation(event)">
+        <div class="form-group">
+          <label class="form-label">Destino</label>
+          <select id="destination" class="form-input" required>
+            <option value="">Selecciona un destino</option>
+            <option value="biblioteca">Biblioteca Central</option>
+            <option value="cafeteria">Cafetería Principal</option>
+            <option value="edificio-a">Edificio A</option>
+            <option value="lab-comp">Laboratorio de Computación</option>
+            <option value="rectorado">Rectorado</option>
+            <option value="auditorio">Auditorio</option>
+          </select>
+        </div>
+        <button class="btn-submit" type="submit"><i class="fas fa-route"></i> Iniciar Navegación</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ------------------------
+       DATOS DE EDIFICIOS (INFORMACIÓN)
+       ------------------------- */
+    const BUILDINGS = {
+      "edificio-a": {
+        name: "Edificio A",
+        desc: "Sede principal de aulas teóricas. Varias carreras dictan clases aquí.",
+        hours: "Lun-Vie 07:30 - 20:00",
+        services: ["Aulas", "Secretaría"],
+        photoAlt: "Edificio A"
+      },
+      "biblioteca": {
+        name: "Biblioteca Central",
+        desc: "Centro de recursos con préstamo de libros y salas de estudio.",
+        hours: "Lun-Vie 08:00 - 22:00",
+        services: ["Préstamo de Libros", "Salas de estudio", "WiFi"],
+        photoAlt: "Biblioteca"
+      },
+      "cafeteria": {
+        name: "Cafetería Principal",
+        desc: "Espacio de comida y descanso. Variedad de alimentos y bebidas.",
+        hours: "Lun-Dom 07:00 - 20:00",
+        services: ["Desayuno", "Almuerzo", "Bebidas"],
+        photoAlt: "Cafetería"
+      },
+      "lab-comp": {
+        name: "Laboratorio de Computación",
+        desc: "Laboratorio equipado para prácticas y trabajos de programación.",
+        hours: "Lun-Vie 08:00 - 18:00",
+        services: ["PCs", "Impresión", "Software especializado"],
+        photoAlt: "Laboratorio"
+      },
+      "rectorado": {
+        name: "Rectorado",
+        desc: "Administración superior de la universidad.",
+        hours: "Lun-Vie 08:30 - 17:30",
+        services: ["Atención administrativa"],
+        photoAlt: "Rectorado"
+      },
+      "auditorio": {
+        name: "Auditorio",
+        desc: "Sala para eventos académicos y culturales.",
+        hours: "Según eventos",
+        services: ["Eventos", "Conferencias"],
+        photoAlt: "Auditorio"
+      }
+    };
+
+    let selectedBuildingEl = null;
+    let originId = "rectorado"; // por defecto el origen es Rectorado
+    let currentRoute = null;
+
+    /* ------------------------
+       UTIL: posicionar elementos .building según data-x y data-y
+       ------------------------- */
+    function positionBuildings() {
+      const canvas = document.getElementById("mapCanvas");
+      const buildings = canvas.querySelectorAll(".building");
+      buildings.forEach(el => {
+        const x = parseFloat(el.dataset.x || 0);
+        const y = parseFloat(el.dataset.y || 0);
+        // transform % to px (using container bounding box)
+        el.style.left = x + "%";
+        el.style.top = y + "%";
+      });
+    }
+
+    // llama al inicio y al resize
+    positionBuildings();
+    window.addEventListener("resize", positionBuildings);
+
+    /* ------------------------
+       SELECCIONAR EDIFICIO (USAR event recibido)
+       ------------------------- */
+    function selectBuilding(evt, name, id) {
+      // evt es el evento del click
+      const el = evt.currentTarget;
+
+      // remover seleccion previa
+      if (selectedBuildingEl) selectedBuildingEl.classList.remove("selected");
+
+      // marcar nueva seleccion
+      el.classList.add("selected");
+      selectedBuildingEl = el;
+
+      // show info
+      showBuildingInfo(id);
+    }
+
+    /* ------------------------
+       MOSTRAR INFORMACIÓN MEJORADA
+       ------------------------- */
+    function showBuildingInfo(id) {
+      const info = BUILDINGS[id];
+      const container = document.getElementById("infoContent");
+      if (!info) {
+        container.innerHTML = `<p style="color:#999;text-align:center">Información no disponible.</p>`;
+        return;
+      }
+
+      // small "photo" placeholder (SVG inline) to avoid external images
+      const svgPhoto = `
+        <div class="info-photo" aria-hidden="true">
+          <svg width="100%" height="100%" viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="120" rx="8" fill="#e9ecef"/>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#777" font-size="14">${info.photoAlt}</text>
+          </svg>
+        </div>
+      `;
+
+      // services pills
+      const servicesHtml = info.services.map(s => `<div class="small-pill">${s}</div>`).join(" ");
+
+      container.innerHTML = `
+        ${svgPhoto}
+        <h3 style="font-size:18px;margin-bottom:6px">${info.name}</h3>
+        <p style="color:#555;margin-bottom:10px">${info.desc}</p>
+        <div class="info-row"><strong style="min-width:88px;color:#666">Horario:</strong><div>${info.hours}</div></div>
+        <div class="info-row"><strong style="min-width:88px;color:#666">Servicios:</strong><div style="display:flex;gap:8px;flex-wrap:wrap">${servicesHtml}</div></div>
+
+        <div style="margin-top:12px">
+          <button class="btn-navigate" onclick="setOrigin('${id}')"><i class="fas fa-map-pin"></i> Establecer origen aquí</button>
+          <button class="btn-navigate" style="margin-top:8px" onclick="openNavigateTo('${id}')"><i class="fas fa-route"></i> Navegar a este lugar</button>
+        </div>
+      `;
+    }
+
+    /* ------------------------
+       BUSCADOR (filtrado)
+       ------------------------- */
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const text = this.value.trim().toLowerCase();
+      const buildings = document.querySelectorAll(".building");
+      buildings.forEach(b => {
+        const name = b.querySelector(".building-name").innerText.toLowerCase();
+        // mostrar coincidencias por nombre o id
+        const id = b.dataset.id || "";
+        if (!text) {
+          b.style.display = "block";
+        } else {
+          b.style.display = (name.includes(text) || id.includes(text)) ? "block" : "none";
+        }
+      });
+    });
+
+    /* ------------------------
+       VOICE SEARCH (compatibilidad simple)
+       ------------------------- */
+    function voiceSearch() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Tu navegador no soporta reconocimiento de voz.");
+        return;
+      }
+      const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const r = new Rec();
+      r.lang = "es-ES";
+      r.start();
+      r.onresult = (ev) => {
+        const text = ev.results[0][0].transcript || "";
+        document.getElementById("searchInput").value = text;
+        document.getElementById("searchInput").dispatchEvent(new Event("input"));
+      };
+    }
+
+    /* ------------------------
+       MODALES
+       ------------------------- */
+    function openModal(type) {
+      if (type === "addclass") document.getElementById("modalAddClass").style.display = "flex";
+      if (type === "navigate") document.getElementById("modalNavigate").style.display = "flex";
+      if (type === "schedule") alert("📚 Aquí se mostraría tu horario.");
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    }
+
+    /* ------------------------
+       AGREGAR CLASE (simple)
+       ------------------------- */
+    function addClass(e) {
+      e.preventDefault();
+      const name = document.getElementById("courseName").value;
+      const time = document.getElementById("courseTime").value;
+      const location = document.getElementById("courseLocation").value;
+
+      const container = document.querySelector(".sidebar .card:nth-child(2)");
+      const newClass = document.createElement("div");
+      newClass.className = "class-item";
+      newClass.onclick = () => navigateTo(location);
+      newClass.innerHTML = `
+        <div class="class-time">${time}</div>
+        <div style="flex:1">
+          <div style="font-weight:600">${name}</div>
+          <div style="font-size:13px;color:#666"><i class="fas fa-map-marker-alt"></i> ${location}</div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      `;
+      container.appendChild(newClass);
+      closeModal("modalAddClass");
+      alert("✔ Clase agregada correctamente.");
+    }
+
+    /* ------------------------
+       NAVEGACIÓN: cálculo simple de ruta y dibujo SVG
+       ------------------------- */
+    function openNavigateTo(targetId) {
+      // abrimos modal con destino seleccionado
+      const destSelect = document.getElementById("destination");
+      if (destSelect) {
+        destSelect.value = targetId;
+      }
+      openModal("navigate");
+    }
+
+    function startNavigation(e) {
+      e.preventDefault();
+      const dest = document.getElementById("destination").value;
+      closeModal("modalNavigate");
+      if (!dest) return;
+      // dibujar ruta desde originId hacia dest
+      drawRoute(originId, dest);
+      // scroll info to destination
+      const b = document.querySelector(`.building[data-id="${dest}"]`);
+      if (b) b.classList.add("selected");
+      showSimpleInstructions(originId, dest);
+    }
+
+    function navigateTo(id) {
+      // se usa cuando usuario pulsa en accesos rápidos o en la lista
+      drawRoute(originId, id);
+      showSimpleInstructions(originId, id);
+      // mostrar info del destino
+      showBuildingInfo(id);
+      // marcar visualmente
+      const prev = document.querySelector(".building.selected");
+      if (prev) prev.classList.remove("selected");
+      const el = document.querySelector(`.building[data-id="${id}"]`);
+      if (el) el.classList.add("selected");
+    }
+
+    function setOrigin(id) {
+      originId = id;
+      alert("Origen establecido: " + (BUILDINGS[id] ? BUILDINGS[id].name : id));
+      // markieren el origen visualmente
+      const all = document.querySelectorAll(".building");
+      all.forEach(b => b.classList.remove("origin"));
+      const el = document.querySelector(`.building[data-id="${id}"]`);
+      if (el) el.classList.add("origin");
+    }
+
+    function showSimpleInstructions(fromId, toId) {
+      // instrucciones simplificadas (puedes extenderlo)
+      const from = BUILDINGS[fromId] ? BUILDINGS[fromId].name : fromId;
+      const to = BUILDINGS[toId] ? BUILDINGS[toId].name : toId;
+      const info = document.getElementById("infoContent");
+      info.insertAdjacentHTML("beforeend", `
+        <div style="margin-top:12px;padding:12px;background:#eef6ff;border-radius:10px">
+          <strong style="display:block;margin-bottom:6px">Instrucciones básicas</strong>
+          <div>🔹 Origen: <strong>${from}</strong></div>
+          <div>🔹 Destino: <strong>${to}</strong></div>
+          <div style="margin-top:8px;color:#555">Sigue la ruta mostrada en el mapa. Esta es una ruta directa estimada en línea recta sobre el plano del campus.</div>
+        </div>
+      `);
+    }
+
+    /* ------------------------
+       DIBUJAR RUTA (SVG polyline simple entre puntos)
+       ------------------------- */
+    function drawRoute(fromId, toId) {
+      // limpiar ruta previa
+      clearRoute();
+
+      const svg = document.getElementById("mapSvg");
+      const routesLayer = document.getElementById("routesLayer");
+
+      const fromEl = document.querySelector(`.building[data-id="${fromId}"]`);
+      const toEl = document.querySelector(`.building[data-id="${toId}"]`);
+      if (!fromEl || !toEl) {
+        alert("No se encontró origen o destino en el mapa.");
+        return;
+      }
+
+      // convertir % a coordenadas SVG (viewBox 0..1000)
+      const fx = parseFloat(fromEl.dataset.x || 0) / 100 * 1000;
+      const fy = parseFloat(fromEl.dataset.y || 0) / 100 * 1000;
+      const tx = parseFloat(toEl.dataset.x || 0) / 100 * 1000;
+      const ty = parseFloat(toEl.dataset.y || 0) / 100 * 1000;
+
+      // Crear polyline (linea simple: origen -> destino)
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      line.setAttribute("points", `${fx},${fy} ${tx},${ty}`);
+      line.setAttribute("class", "route-line animated");
+      line.setAttribute("stroke", "#4facfe");
+      line.setAttribute("fill", "none");
+      line.setAttribute("stroke-width", "6");
+      line.setAttribute("stroke-linecap", "round");
+      routesLayer.appendChild(line);
+
+      // marker inicio / fin (círculos)
+      const startCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      startCircle.setAttribute("cx", fx);
+      startCircle.setAttribute("cy", fy);
+      startCircle.setAttribute("r", 8);
+      startCircle.setAttribute("fill", "#667eea");
+      routesLayer.appendChild(startCircle);
+
+      const endCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      endCircle.setAttribute("cx", tx);
+      endCircle.setAttribute("cy", ty);
+      endCircle.setAttribute("r", 8);
+      endCircle.setAttribute("fill", "#764ba2");
+      routesLayer.appendChild(endCircle);
+
+      currentRoute = { line, startCircle, endCircle };
+
+      // animación: recalcular dasharray según longitud
+      // (obtener longitud real del trazo)
+      requestAnimationFrame(() => {
+        try {
+          const len = line.getTotalLength ? line.getTotalLength() : 1000;
+          line.style.strokeDasharray = len;
+          line.style.strokeDashoffset = len;
+          // forzar reflow then animate
+          void line.getBoundingClientRect();
+          line.classList.add("animated");
+          // remove animation class after animation completes so subsequent draws animate again
+          setTimeout(() => line.classList.remove("animated"), 1400);
+        } catch (err) {
+          // fallback si no soporta getTotalLength
+        }
+      });
+    }
+
+    function clearRoute() {
+      const routesLayer = document.getElementById("routesLayer");
+      while (routesLayer.firstChild) routesLayer.removeChild(routesLayer.firstChild);
+      currentRoute = null;
+    }
+
+    function resetSelection() {
+      if (selectedBuildingEl) selectedBuildingEl.classList.remove("selected");
+      selectedBuildingEl = null;
+      document.getElementById("infoContent").innerHTML = `<p style="color:#999;text-align:center">Selecciona un edificio del mapa</p>`;
+      clearRoute();
+    }
+
+    /* ------------------------
+       NOTIFICACIONES
+       ------------------------- */
+    function showNotifications() {
+      alert("🔔 Tienes 3 nuevas notificaciones.");
+    }
+
+    /* ------------------------
+       Inicialización: centrar vista / accessible
+       ------------------------- */
+    // marcar origen por defecto visualmente
+    document.addEventListener("DOMContentLoaded", () => {
+      const originEl = document.querySelector(`.building[data-id="${originId}"]`);
+      if (originEl) originEl.classList.add("origin");
+      // colocar buildings al inicio
+      positionBuildings();
+    });
+
+    // limpiar rutas si se recarga la ventana
+    window.addEventListener("beforeunload", clearRoute);
+  </script>
+</body>
+</html>
